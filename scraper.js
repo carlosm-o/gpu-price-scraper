@@ -19,7 +19,7 @@ const scrapeSite = async (searchValue) => {
 
         await page.click('.btn-alt');
 
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(2000);
 
         const newEggResult = await page.$$eval('.item-cell > div', (items) =>
             items.map((item) => {
@@ -33,11 +33,11 @@ const scrapeSite = async (searchValue) => {
             })
         );
 
-        //bestbuy.com
-        page.setDefaultNavigationTimeout(0);
+        // //bestbuy.com
+
         await page.goto('https://www.bestbuy.com/site/computer-cards-components/video-graphics-cards/');
 
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(2000);
 
         await page.type('input[id=gh-search-input]', searchValue);
 
@@ -45,7 +45,9 @@ const scrapeSite = async (searchValue) => {
 
         await page.click('button.header-search-button');
 
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(2000);
+
+        await page.waitForSelector('li.sku-item');
 
         const bestBuyResult = await page.$$eval('li.sku-item', (items) =>
             items.map((item) => {
@@ -64,16 +66,42 @@ const scrapeSite = async (searchValue) => {
             })
         );
 
-        browser.close();
+        // amazon
+        await page.goto('https://www.amazon.com/ref=nav_logo');
 
-        const combinedResults = { ...newEggResult, ...bestBuyResult };
+        await page.waitForTimeout(2000);
+
+        await page.type('input[id=twotabsearchtextbox]', searchValue);
+
+        await page.waitForTimeout(1000);
+
+        await page.click('input#nav-search-submit-button');
+
+        await page.waitForTimeout(2000);
+
+        const amazonResult = await page.$$eval('div[data-component-type="s-search-result"]', (items) =>
+            items.map((item) => {
+                return {
+                    store: 'Amazon',
+                    name: item.querySelector('h2 > a > span').innerText,
+                    url: item.querySelector('h2 > a > span').parentElement.href,
+                };
+            })
+        );
+
+        await page.close();
+        await browser.close();
+
+        const combinedResults = Object.assign(newEggResult, bestBuyResult, amazonResult);
 
         const newJSON = JSON.stringify(combinedResults);
 
-        console.log(newJSON);
+        return newJSON;
     } catch (err) {
         console.log(err);
     }
 };
 
-scrapeSite('3080');
+module.exports = {
+    scrapeSite,
+};
