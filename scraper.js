@@ -28,7 +28,7 @@ const scrapeSite = async (searchValue) => {
                     store: 'newegg',
                     name: item.querySelector('div.item-cell > div > div.item-info > a').innerText,
                     url: item.querySelector('div.item-cell > div > div.item-info > a').href,
-                    price: item.querySelector('div.item-cell > div > div.item-action > ul > li.price-current > strong')
+                    price: item.querySelector('div.item-cell > div > div.item-action > ul > li.price-current')
                         .innerText,
                 };
             })
