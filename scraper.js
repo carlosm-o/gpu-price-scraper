@@ -7,6 +7,7 @@ const scrapeSite = async (searchValue) => {
         const browser = await puppeteer.launch({
             headless: false,
             args: ['--no-sandbox', '--disable-gpu'],
+            defaultViewport: null,
         });
         const page = await browser.newPage();
 
@@ -33,7 +34,7 @@ const scrapeSite = async (searchValue) => {
             })
         );
 
-        // //bestbuy.com
+        //bestbuy.com
 
         await page.goto('https://www.bestbuy.com/site/computer-cards-components/video-graphics-cards/');
 
@@ -53,15 +54,9 @@ const scrapeSite = async (searchValue) => {
             items.map((item) => {
                 return {
                     store: 'Best Buy',
-                    name: item.querySelector(
-                        'li.sku-item > div > div > div > div > div > div.right-column > div.information > div:nth-child(2) > div > h4 > a'
-                    ).innerText,
-                    url: item.querySelector(
-                        'li.sku-item > div > div > div > div > div > div.right-column > div.information > div:nth-child(2) > div > h4 > a'
-                    ).href,
-                    price: item.querySelector(
-                        'li.sku-item > div > div > div > div > div > div > div > div > div > div > div > div > div > div > div:nth-child(2) > div > div > div > span:nth-child(1)'
-                    ).innerText,
+                    name: item.querySelector('h4 > a').innerText,
+                    url: item.querySelector('h4 > a').href,
+                    price: item.querySelector('div.priceView-hero-price.priceView-customer-price > span').innerText,
                 };
             })
         );
@@ -92,9 +87,13 @@ const scrapeSite = async (searchValue) => {
         await page.close();
         await browser.close();
 
-        const combinedResults = Object.assign(newEggResult, bestBuyResult, amazonResult);
+        const combinedNewEggAmazon = Object.assign(newEggResult, amazonResult);
+
+        const combinedResults = Object.assign(combinedNewEggAmazon, bestBuyResult);
 
         const newJSON = JSON.stringify(combinedResults);
+
+        console.log(combinedResults);
 
         return newJSON;
     } catch (err) {
